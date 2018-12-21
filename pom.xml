@@ -1,0 +1,125 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.jmorille.cert</groupId>
+    <artifactId>http-cert</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <!-- plugins -->
+        <maven-resources-plugin.version>3.1.0</maven-resources-plugin.version>
+        <exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
+        <iterator-maven-plugin.version>0.5.0</iterator-maven-plugin.version>
+        <!-- build config -->
+        <ca.directory>${project.basedir}/src/main/resources/ca</ca.directory>
+        <gen.directory>${project.build.directory}/generated</gen.directory>
+    </properties>
+
+    <build>
+        <plugins>
+            <!-- copy resources -->
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>${maven-resources-plugin.version}</version>
+                <executions>
+                    <!-- copy binary -->
+                    <execution>
+                        <id>copy-genCert</id>
+                        <!-- here the phase you need -->
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${gen.directory}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.basedir}</directory>
+                                    <filtering>false</filtering>
+                                    <includes>
+                                        <include>genCert.sh</include>
+                                        <include>openssl.cnf</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+
+            <!-- generate http certificat -->
+            <plugin>
+                <groupId>com.soebes.maven.plugins</groupId>
+                <artifactId>iterator-maven-plugin</artifactId>
+                <version>${iterator-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>iterator</goal>
+                        </goals>
+                        <configuration>
+                            <items>
+                                <item>localhost</item>
+                                <item>one</item>
+                                <item>two</item>
+                                <item>three</item>
+                            </items>
+                            <pluginExecutors>
+                                <pluginExecutor>
+                                    <plugin>
+                                        <groupId>org.codehaus.mojo</groupId>
+                                        <artifactId>exec-maven-plugin</artifactId>
+                                        <version>${exec-maven-plugin.version}</version>
+                                    </plugin>
+                                    <goal>exec</goal>
+                                    <configuration>
+                                        <workingDirectory>${gen.directory}</workingDirectory>
+                                        <executable>genCert.sh</executable>
+                                        <commandlineArgs>--caDir "${ca.directory}" -d @item@ genCert</commandlineArgs>
+                                    </configuration>
+                                </pluginExecutor>
+                            </pluginExecutors>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+
+    <profiles>
+        <profile>
+            <id>ca</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>${exec-maven-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <executable>genCert.sh</executable>
+                            <workingDirectory>${project.basedir}</workingDirectory>
+                            <commandlineArgs>--caDir "${ca.directory}" genCA</commandlineArgs>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+    </profiles>
+
+
+</project>
