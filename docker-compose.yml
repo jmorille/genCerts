@@ -1,0 +1,8 @@
+version: '3'
+services:
+  web:
+    image: httpd
+    container_name: apache_web
+    restart: always
+    ports:
+      - "80:80"
