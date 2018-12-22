@@ -5,6 +5,7 @@
     <groupId>com.jmorille.cert</groupId>
     <artifactId>http-cert</artifactId>
     <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
@@ -12,8 +13,10 @@
         <!-- plugins -->
         <maven-resources-plugin.version>3.1.0</maven-resources-plugin.version>
         <exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
+        <maven-assembly-plugin.version>3.1.0</maven-assembly-plugin.version>
         <iterator-maven-plugin.version>0.5.0</iterator-maven-plugin.version>
         <!-- build config -->
+        <packaging.format>zip</packaging.format>
         <ca.directory>${project.basedir}/src/main/resources/ca</ca.directory>
         <gen.directory>${project.build.directory}/generated</gen.directory>
     </properties>
@@ -88,11 +91,40 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- packaging -->
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>${maven-assembly-plugin.version}</version>
+                <configuration>
+                    <appendAssemblyId>false</appendAssemblyId>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly-certs</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>${project.basedir}/src/main/assembly/app-certs.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
 
     <profiles>
+        <profile>
+            <id>todir</id>
+            <properties>
+                <packaging.format>dir</packaging.format>
+            </properties>
+        </profile>
         <profile>
             <id>ca</id>
             <build>
@@ -118,6 +150,7 @@
                 </plugins>
             </build>
         </profile>
+
 
     </profiles>
 
