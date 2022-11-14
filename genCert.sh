@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Doc : http://www.linux-france.org/prj/edu/archinet/systeme/ch24s03.html
 # Apache https://httpd.apache.org/docs/2.4/fr/ssl/ssl_faq.html
 
