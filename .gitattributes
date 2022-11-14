@@ -1,0 +1,6 @@
+# Declare files that will always have LF line endings on checkout.
+*.sh text eol=lf
+*.jsonld text eol=lf
+*_log text eol=lf
+*.log text eol=lf
+*.prom text eol=lf
